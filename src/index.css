@@ -1,0 +1,20 @@
+@import url(https://db.onlinewebfonts.com/c/2ad24930d996d33544708f0637f7690a?family=Porsche+Next);
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  font-family: "Porsche Next", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  background-color: #ffffff;
+  color: #000000;
+}
