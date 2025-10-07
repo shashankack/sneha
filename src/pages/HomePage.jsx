@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Container,
@@ -7,338 +8,493 @@ import {
   Grid,
   Card,
   CardContent,
-  Divider,
+  CardMedia,
   Chip,
+  Stack,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { useBooking } from "../contexts/BookingContext";
+import Navbar from "../components/Navbar";
+import ChatModal from "../components/ChatModal";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
+import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
+import NatureIcon from "@mui/icons-material/Nature";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import VerifiedIcon from "@mui/icons-material/Verified";
-import SpeedIcon from "@mui/icons-material/Speed";
 
 const HomePage = () => {
-  const { nextStep } = useBooking();
+  const navigate = useNavigate();
+  const { updateSelectedModel } = useBooking();
 
   const features = [
     {
-      icon: <SmartToyIcon sx={{ fontSize: 40 }} />,
+      icon: <SmartToyIcon sx={{ fontSize: 40, color: "#CC0000" }} />,
       title: "AI Concierge",
-      description: "Personalized model recommendations",
+      description:
+        "Intelligent chat assistant for personalized recommendations",
     },
     {
-      icon: <ViewInArIcon sx={{ fontSize: 40 }} />,
+      icon: <ViewInArIcon sx={{ fontSize: 40, color: "#CC0000" }} />,
       title: "AR/VR Preview",
-      description: "Visualize in your driveway",
+      description:
+        "Visualize your Porsche in your driveway before test driving",
     },
     {
-      icon: <FlashOnIcon sx={{ fontSize: 40 }} />,
-      title: "Instant Booking",
-      description: "Confirmed in seconds",
+      icon: <FlashOnIcon sx={{ fontSize: 40, color: "#CC0000" }} />,
+      title: "3-Click Booking",
+      description: "Fastest luxury car booking experience ever created",
     },
   ];
 
-  const benefits = [
-    { icon: <LocalShippingIcon />, text: "Concierge Delivery Available" },
-    { icon: <VerifiedIcon />, text: "Verified Porsche Experience" },
-    { icon: <SpeedIcon />, text: "3-Click Simplicity" },
+  const porscheModels = [
+    {
+      name: "Taycan",
+      title: "The All-Electric Performer",
+      type: "Electric",
+      price: "From $158,000",
+      image: "/models/taycan.jpeg",
+      icon: <ElectricBoltIcon sx={{ color: "#4CAF50" }} />,
+    },
+    {
+      name: "911 Turbo",
+      title: "The Iconic Legend",
+      type: "Petrol",
+      price: "From $231,000",
+      image: "/models/911.jpeg",
+      icon: <LocalGasStationIcon sx={{ color: "#FF9800" }} />,
+    },
+    {
+      name: "Cayenne",
+      title: "The Versatile Performer",
+      type: "Hybrid",
+      price: "From $131,000",
+      image: "/models/cayenne.jpg",
+      icon: <NatureIcon sx={{ color: "#2196F3" }} />,
+    },
   ];
+
+  const handleModelClick = (model) => {
+    updateSelectedModel(model);
+    navigate('/booking');
+  };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        bgcolor: "black",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Video Background */}
+    <>
+      <Navbar />
+
+      {/* Hero Video Section */}
       <Box
         sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 0,
+          height: "100vh",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
+        {/* Video Background */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 0,
           }}
         >
-          <source
-            src="https://res.cloudinary.com/dhlowafw0/video/upload/v1759769558/Porsche_Taycan_Turbo_S_mhcviq.mp4"
-            type="video/mp4"
-          />
-        </video>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          >
+            <source
+              src="https://res.cloudinary.com/dhlowafw0/video/upload/v1759769558/Porsche_Taycan_Turbo_S_mhcviq.mp4"
+              type="video/mp4"
+            />
+          </video>
+        </Box>
+
+        {/* Video Overlay */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background:
+              "linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))",
+            zIndex: 1,
+          }}
+        />
+
+        {/* Hero Content */}
+        <Container
+          maxWidth="lg"
+          sx={{
+            position: "relative",
+            zIndex: 2,
+            height: "100%",
+            display: "flex",
+            alignItems: "end",
+            justifyContent: { xs: "center", md: "start" },
+            py: 10,
+          }}
+        >
+          <Box sx={{ textAlign: { xs: "center", md: "start" } }}>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              <Typography
+                variant="h1"
+                sx={{
+                  fontWeight: 800,
+                  mb: 3,
+                  color: "white",
+                  textShadow: "2px 4px 16px rgba(0,0,0,0.8)",
+                  fontSize: { xs: "2rem", sm: "3rem", md: "4rem" },
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.1,
+                }}
+              >
+                The Next Generation
+                <br />
+                <Box
+                  component="span"
+                  sx={{
+                    color: "#CC0000",
+                    fontSize: { xs: "1.5rem", sm: "2.5rem", md: "3.5rem" },
+                  }}
+                >
+                  Test Drive Experience
+                </Box>
+              </Typography>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.7 }}
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 400,
+                  mb: 6,
+                  color: "rgba(255, 255, 255, 0.9)",
+                  fontSize: { xs: "1rem", md: "1.5rem" },
+                  maxWidth: "900px",
+                  mx: "auto",
+                }}
+              >
+                AI-powered concierge, AR previews, and 3-click booking.
+                <br />
+                Experience Porsche like never before.
+              </Typography>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.9, duration: 0.6 }}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => navigate('/model-selection')}
+                sx={{
+                  px: 6,
+                  py: 2,
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  borderRadius: 2,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  boxShadow: "0 16px 48px rgba(204, 0, 0, 0.6)",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 20px 56px rgba(204, 0, 0, 0.8)",
+                  },
+                }}
+              >
+                Start Your Journey
+              </Button>
+            </motion.div>
+          </Box>
+        </Container>
       </Box>
 
-      {/* Video Overlay */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7))",
-          zIndex: 1,
-        }}
-      />
-
-      {/* Overlay Pattern */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background:
-            "radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.4) 100%)",
-          zIndex: 2,
-        }}
-      />
-
-      {/* Content */}
-      <Container
-        maxWidth="lg"
-        sx={{ position: "relative", zIndex: 3, py: { xs: 6, md: 10 } }}
-      >
-        {/* Header Section */}
-        <Box sx={{ textAlign: "center", mb: 8 }}>
+      {/* Main Content - Bright Background */}
+      <Box sx={{ bgcolor: "#F8F9FA", minHeight: "100vh" }}>
+        {/* Features Section */}
+        <Container maxWidth="lg" sx={{ py: 10 }}>
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
           >
             <Typography
-              variant="h1"
+              variant="h2"
               sx={{
-                fontWeight: 800,
-                mb: 2,
-                color: "white",
-                textShadow: "2px 4px 16px rgba(0,0,0,0.8)",
-                fontSize: { xs: "2.5rem", sm: "3.5rem", md: "5rem" },
-                letterSpacing: "-0.02em",
-                lineHeight: 1.1,
+                textAlign: "center",
+                fontWeight: 700,
+                mb: 3,
+                color: "black",
+                fontSize: { xs: "2.5rem", md: "3.5rem" },
               }}
             >
-              The Next Generation
-              <br />
-              <Box component="span" sx={{ color: "#CC0000" }}>
-                Test Drive
-              </Box>
+              Revolutionary Features
             </Typography>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-          >
             <Typography
-              variant="h5"
+              variant="h6"
               sx={{
-                fontWeight: 300,
-                mb: 2,
-                color: "rgba(255, 255, 255, 0.9)",
-                textShadow: "1px 2px 8px rgba(0,0,0,0.6)",
-                fontSize: { xs: "1.25rem", md: "1.75rem" },
+                textAlign: "center",
+                color: "text.secondary",
+                mb: 8,
                 maxWidth: "800px",
                 mx: "auto",
               }}
             >
-              Experience luxury redefined. Book your Porsche test drive in just
-              3 clicks.
+              Experience the future of luxury car booking with our cutting-edge
+              technology
             </Typography>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-          >
-            <Box sx={{ mt: 5, mb: 6 }}>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  endIcon={<ArrowForwardIcon />}
-                  onClick={nextStep}
-                  sx={{
-                    px: 8,
-                    py: 2.5,
-                    fontSize: { xs: ".8rem", md: "1.25rem" },
-                    fontWeight: 700,
-                    borderRadius: 1,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    boxShadow: "0 12px 40px rgba(204, 0, 0, 0.5)",
-                    background:
-                      "linear-gradient(135deg, #CC0000 0%, #990000 100%)",
-                    "&:hover": {
-                      boxShadow: "0 16px 48px rgba(204, 0, 0, 0.7)",
-                      background:
-                        "linear-gradient(135deg, #E60000 0%, #CC0000 100%)",
-                    },
-                  }}
-                >
-                  Start Your Journey
-                </Button>
-              </motion.div>
-              <Typography
-                variant="body2"
-                sx={{
-                  mt: 2,
-                  color: "rgba(255, 255, 255, 0.7)",
-                  fontSize: "0.875rem",
+          <Grid container spacing={6}>
+            {features.map((feature, index) => (
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 6,
+                  md: 4,
                 }}
+                key={feature.title}
               >
-                No commitments. Just pure driving excitement.
-              </Typography>
-            </Box>
-          </motion.div>
-
-          {/* Benefits Bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.6 }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                gap: { xs: 2, md: 4 },
-                flexWrap: "wrap",
-                mb: 8,
-              }}
-            >
-              {benefits.map((benefit, index) => (
                 <motion.div
-                  key={benefit.text}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }}
-                  whileHover={{ y: -4 }}
+                  initial={{ opacity: 0, y: 60 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.2, duration: 0.8 }}
+                  whileHover={{ y: -8 }}
                 >
-                  <Box
+                  <Card
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 1,
-                      bgcolor: "rgba(255, 255, 255, 0.1)",
-                      backdropFilter: "blur(10px)",
-                      px: 3,
-                      py: 1.5,
-                      borderRadius: 2,
-                      border: "1px solid rgba(255, 255, 255, 0.2)",
-                      width: 300,
+                      height: "100%",
+                      bgcolor: "white",
+                      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+                      borderRadius: 4,
+                      border: "1px solid rgba(0, 0, 0, 0.05)",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        boxShadow: "0 16px 48px rgba(204, 0, 0, 0.15)",
+                        transform: "translateY(-8px)",
+                      },
                     }}
                   >
-                    <Box sx={{ color: "#CC0000" }}>{benefit.icon}</Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "white",
-                        fontWeight: 500,
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      {benefit.text}
-                    </Typography>
-                  </Box>
+                    <CardContent sx={{ p: 5, textAlign: "center" }}>
+                      <Box sx={{ mb: 3 }}>{feature.icon}</Box>
+                      <Typography
+                        variant="h5"
+                        gutterBottom
+                        sx={{ fontWeight: 700, color: "black", mb: 2 }}
+                      >
+                        {feature.title}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{ color: "text.secondary", lineHeight: 1.8 }}
+                      >
+                        {feature.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
                 </motion.div>
-              ))}
-            </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+
+        {/* Models Showcase Section */}
+        <Container maxWidth="lg" sx={{ py: 10 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <Typography
+              variant="h2"
+              sx={{
+                textAlign: "center",
+                fontWeight: 700,
+                mb: 3,
+                color: "black",
+                fontSize: { xs: "2.5rem", md: "3.5rem" },
+              }}
+            >
+              Your Porsche Awaits
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+                color: "text.secondary",
+                mb: 8,
+                maxWidth: "700px",
+                mx: "auto",
+              }}
+            >
+              Discover our lineup of legendary sports cars, each designed to
+              deliver pure driving emotion
+            </Typography>
           </motion.div>
 
-          <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.1)", mb: 8 }} />
-        </Box>
-
-        {/* Feature Cards */}
-        <Grid container spacing={4} sx={{ mb: 6 }}>
-          {features.map((feature, index) => (
-            <Grid
-              size={{
-                xs: 12,
-                sm: 4,
-              }}
-              key={feature.title}
-            >
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 + index * 0.15, duration: 0.6 }}
-                whileHover={{ y: -8, transition: { duration: 0.3 } }}
+          <Grid container spacing={4}>
+            {porscheModels.map((model, index) => (
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 6,
+                  md: 4,
+                }}
+                key={model.name}
               >
-                <Card
-                  sx={{
-                    bgcolor: "rgba(255, 255, 255, 0.05)",
-                    backdropFilter: "blur(20px)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: 3,
-                    transition: "all 0.3s ease",
-                    height: "100%",
-                    "&:hover": {
-                      bgcolor: "rgba(255, 255, 255, 0.08)",
-                      border: "1px solid rgba(204, 0, 0, 0.5)",
-                      boxShadow: "0 12px 40px rgba(204, 0, 0, 0.2)",
-                    },
-                  }}
+                <motion.div
+                  initial={{ opacity: 0, y: 60 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.2, duration: 0.8 }}
+                  whileHover={{ scale: 1.02 }}
                 >
-                  <CardContent sx={{ p: 4, textAlign: "center" }}>
+                  <Box
+                    onClick={() => handleModelClick(model)}
+                    sx={{
+                      height: 280,
+                      position: "relative",
+                      overflow: "hidden",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        "& .model-image": {
+                          transform: "scale(1.1)",
+                        },
+                        "& .arrow-icon": {
+                          transform: "translateX(8px)",
+                        },
+                      },
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={model.image}
+                      alt={model.name}
+                      className="model-image"
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        transition: "transform 0.3s ease",
+                      }}
+                    />
                     <Box
                       sx={{
-                        color: "#CC0000",
-                        mb: 2,
-                        display: "inline-flex",
-                        p: 2,
-                        borderRadius: 2,
-                        bgcolor: "rgba(204, 0, 0, 0.1)",
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        background:
+                          "linear-gradient(transparent, rgba(0,0,0,0.8))",
+                        p: 3,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
                       }}
                     >
-                      {feature.icon}
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 700,
+                          color: "white",
+                          textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+                        }}
+                      >
+                        {model.name}
+                      </Typography>
+                      <ArrowForwardIcon
+                        className="arrow-icon"
+                        sx={{
+                          color: "white",
+                          mr: 4,
+                          fontSize: 28,
+                          transition: "transform 0.3s ease",
+                        }}
+                      />
                     </Box>
-                    <Typography
-                      variant="h5"
-                      gutterBottom
-                      sx={{ fontWeight: 600, color: "white", mb: 1.5 }}
-                    >
-                      {feature.title}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-                    >
-                      {feature.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-    </Box>
+                  </Box>
+                </motion.div>
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* CTA Section */}
+          <Box sx={{ textAlign: "center", mt: 10 }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 700, mb: 4, color: "black" }}
+              >
+                Ready to Experience Porsche?
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => navigate('/model-selection')}
+                sx={{
+                  px: 8,
+                  py: 3,
+                  fontSize: "1.25rem",
+                  fontWeight: 700,
+                  borderRadius: 2,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  boxShadow: "0 12px 40px rgba(204, 0, 0, 0.3)",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 16px 48px rgba(204, 0, 0, 0.4)",
+                  },
+                }}
+              >
+                Book Your Test Drive
+              </Button>
+            </motion.div>
+          </Box>
+        </Container>
+      </Box>
+      
+      {/* Chat Modal with Full Booking Flow */}
+      <ChatModal />
+    </>
   );
 };
 

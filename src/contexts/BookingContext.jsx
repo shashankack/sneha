@@ -78,6 +78,11 @@ export const BookingProvider = ({ children }) => {
     setSelectedModel(model);
   };
   
+  // Update selected model (alias for consistency)
+  const updateSelectedModel = (model) => {
+    setSelectedModel(model);
+  };
+  
   // AI answer handler
   const addAiAnswer = (answer) => {
     setAiAnswers(prev => [...prev, answer]);
@@ -98,6 +103,23 @@ export const BookingProvider = ({ children }) => {
     setPaymentInfo(prev => ({ ...prev, ...info }));
   };
   
+  // Booking data consolidation (for easier access)
+  const bookingData = {
+    bookingType,
+    selectedCenter,
+    ...bookingDetails,
+  };
+  
+  // Update booking data helper
+  const updateBookingData = (data) => {
+    if (data.bookingType !== undefined) setBookingType(data.bookingType);
+    if (data.selectedCenter !== undefined) setSelectedCenter(data.selectedCenter);
+    const detailsUpdate = { ...data };
+    delete detailsUpdate.bookingType;
+    delete detailsUpdate.selectedCenter;
+    updateBookingDetails(detailsUpdate);
+  };
+
   // Context value
   const value = {
     // State
@@ -107,6 +129,7 @@ export const BookingProvider = ({ children }) => {
     bookingType,
     selectedCenter,
     bookingDetails,
+    bookingData,
     userInfo,
     paymentInfo,
     
@@ -126,8 +149,10 @@ export const BookingProvider = ({ children }) => {
     goToStep,
     resetBooking,
     handleSelectModel,
+    updateSelectedModel,
     addAiAnswer,
     updateBookingDetails,
+    updateBookingData,
     updateUserInfo,
     updatePaymentInfo
   };

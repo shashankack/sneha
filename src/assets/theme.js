@@ -1,11 +1,11 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
 
 const rawColors = {
-  white: '#FFFFFF',
-  black: '#000000',
-  porscheRed: '#CC0000',
-  mediumGray: '#808080',
-  lightGray: '#E1E1E1',
+  white: "#FFFFFF",
+  black: "#000000",
+  porscheRed: "#CC0000",
+  mediumGray: "#808080",
+  lightGray: "#E1E1E1",
 };
 
 const theme = createTheme({
@@ -24,7 +24,7 @@ const theme = createTheme({
     // Backgrounds: Mapped to Primary Background (White)
     background: {
       default: rawColors.white, // Clean page backgrounds
-      paper: rawColors.white,   // Content areas and form fields
+      paper: rawColors.white, // Content areas and form fields
     },
     // Text: Mapped to Primary Text/Links (Black)
     text: {
@@ -52,48 +52,48 @@ const theme = createTheme({
     h1: {
       fontFamily: '"Porsche Next", sans-serif',
       fontWeight: 700,
-      letterSpacing: '-0.02em',
+      letterSpacing: "-0.02em",
     },
     h2: {
       fontFamily: '"Porsche Next", sans-serif',
       fontWeight: 700,
-      letterSpacing: '-0.01em',
+      letterSpacing: "-0.01em",
     },
     h3: {
       fontFamily: '"Porsche Next", sans-serif',
       fontWeight: 600,
-      letterSpacing: '0em',
+      letterSpacing: "0em",
     },
     h4: {
       fontFamily: '"Porsche Next", sans-serif',
       fontWeight: 600,
-      letterSpacing: '0em',
+      letterSpacing: "0em",
     },
     h5: {
       fontFamily: '"Porsche Next", sans-serif',
       fontWeight: 600,
-      letterSpacing: '0em',
+      letterSpacing: "0em",
     },
     h6: {
       fontFamily: '"Porsche Next", sans-serif',
       fontWeight: 500,
-      letterSpacing: '0em',
+      letterSpacing: "0em",
     },
     body1: {
       fontFamily: '"Porsche Next", sans-serif',
       fontWeight: 400,
-      letterSpacing: '0.01em',
+      letterSpacing: "0.01em",
     },
     body2: {
       fontFamily: '"Porsche Next", sans-serif',
       fontWeight: 400,
-      letterSpacing: '0.01em',
+      letterSpacing: "0.01em",
     },
     button: {
       fontFamily: '"Porsche Next", sans-serif',
       fontWeight: 600,
-      letterSpacing: '0.05em',
-      textTransform: 'uppercase',
+      letterSpacing: "0.05em",
+      textTransform: "uppercase",
     },
   },
 
@@ -108,19 +108,19 @@ const theme = createTheme({
         containedPrimary: {
           // This ensures the main CTA button (e.g., "Book Now") uses the correct red
           backgroundColor: rawColors.porscheRed,
-          '&:hover': {
+          "&:hover": {
             // Darken the red slightly on hover if desired, or use the lightGray for a background effect
-            backgroundColor: '#B30000', // Example: a darker red
+            backgroundColor: "#B30000", // Example: a darker red
           },
         },
         textSecondary: {
-            // Used for instructional/secondary text links
-            color: rawColors.mediumGray,
+          // Used for instructional/secondary text links
+          color: rawColors.mediumGray,
         },
         // Styling for disabled buttons
-        disabled: {
-          backgroundColor: rawColors.lightGray, // Subtle background
-          color: rawColors.mediumGray, // Disabled text color
+        "&.Mui-disabled": {
+          backgroundColor: rawColors.lightGray,
+          color: rawColors.mediumGray,
         },
       },
     },
@@ -158,12 +158,13 @@ const theme = createTheme({
         root: {
           // Subtle background shading behind content blocks
           // This might be used for subtle cards or form sections
-          '&.Mui-hover-background': { // You would need to apply this class manually
+          "&.Mui-hover-background": {
+            // You would need to apply this class manually
             backgroundColor: rawColors.lightGray,
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   },
 });
 

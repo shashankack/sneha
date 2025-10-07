@@ -1,45 +1,62 @@
-import React from 'react';
+import React, { createContext, useContext, useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useBooking } from './contexts/BookingContext';
 import HomePage from './pages/HomePage';
-import ModelSelection from './pages/ModelSelection';
-import BookingDetails from './pages/BookingDetails';
-import Confirmation from './pages/Confirmation';
+import ConciergeDetails from './pages/ConciergeDetails';
+import PaymentPage from './pages/PaymentPage';
+
+// Authentication context for route protection
+const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+};
+
+// Protected Route component
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/" replace />;
+};
 
 const App = () => {
-  const { step } = useBooking();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Render the appropriate page based on the current step
-  const renderPage = () => {
-    switch (step) {
-      case 0:
-        return <HomePage key="home" />;
-      case 1:
-        return <ModelSelection key="model" />;
-      case 2:
-        return <BookingDetails key="booking" />;
-      case 3:
-        return <Confirmation key="confirmation" />;
-      default:
-        return <HomePage key="home" />;
-    }
+  const authValue = {
+    isAuthenticated,
+    login: () => setIsAuthenticated(true),
+    logout: () => setIsAuthenticated(false),
   };
 
   return (
-    <Box sx={{ minHeight: '100vh' }}>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={step}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.4 }}
-        >
-          {renderPage()}
-        </motion.div>
-      </AnimatePresence>
-    </Box>
+    <AuthContext.Provider value={authValue}>
+      <Box sx={{ minHeight: '100vh' }}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route 
+            path="/concierge" 
+            element={
+              <ProtectedRoute>
+                <ConciergeDetails />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/payment" 
+            element={
+              <ProtectedRoute>
+                <PaymentPage />
+              </ProtectedRoute>
+            } 
+          />
+          {/* Redirect any unknown routes to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Box>
+    </AuthContext.Provider>
   );
 };
 
