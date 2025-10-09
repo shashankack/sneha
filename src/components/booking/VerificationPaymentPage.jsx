@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -66,12 +66,30 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
   });
   const [loginError, setLoginError] = useState("");
 
-  // Show login dialog if not authenticated
+  // Ref for scrolling to review section
+  const reviewSectionRef = useRef(null);
+
+  // Show login dialog if not authenticated or when component first mounts (payment step requires fresh auth)
   useEffect(() => {
     if (!isAuthenticated) {
       setShowLoginDialog(true);
     }
   }, [isAuthenticated]);
+
+  // Always show login dialog when this component first mounts (payment requires fresh authentication)
+  useEffect(() => {
+    setShowLoginDialog(true);
+  }, []);
+
+  // Scroll to review section when step changes to 1
+  useEffect(() => {
+    if (step === 1 && reviewSectionRef.current) {
+      reviewSectionRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [step]);
 
   const handleLoginInputChange = (field) => (event) => {
     setLoginData({
@@ -91,12 +109,23 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
     // Simulate login - in production this would be an API call
     if (loginData.password.length >= 6) {
       login();
-      
-      // Pre-fill user's email from Porsche ID
-      updateUserInfo({ email: loginData.porscheId });
-      
+
+      // Pre-fill user's email from Porsche ID and basic info
+      updateUserInfo({
+        email: loginData.porscheId,
+        name: "Porsche User", // Default name for demo
+        phone: "+61 400 000 000", // Default phone for demo
+      });
+
       setShowLoginDialog(false);
       setLoginError("");
+
+      // Skip directly to appropriate step based on booking type
+      if (bookingType === "concierge") {
+        setStep(0); // Go to payment for concierge (was step 1)
+      } else {
+        setStep(1); // Skip to review for center visits (was step 2)
+      }
     } else {
       setLoginError("Invalid credentials. Please try again.");
     }
@@ -109,33 +138,13 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
     }
   };
 
-  const handleUserInfoChange = (field) => (event) => {
-    updateUserInfo({ [field]: event.target.value });
-  };
-
   const handlePaymentInfoChange = (field) => (event) => {
     updatePaymentInfo({ [field]: event.target.value });
-  };
-
-  const isUserInfoValid = () => {
-    return userInfo.name && userInfo.email && userInfo.phone;
   };
 
   const isPaymentInfoValid = () => {
     if (bookingType === "center") return true; // No payment needed for center visits
     return paymentInfo.cardNumber && paymentInfo.expiry && paymentInfo.cvc;
-  };
-
-  const handleNextStep = () => {
-    if (step === 0 && isUserInfoValid()) {
-      if (bookingType === "concierge") {
-        setStep(1); // Go to payment
-      } else {
-        setStep(2); // Skip payment for center visits
-      }
-    } else if (step === 1 && isPaymentInfoValid()) {
-      setStep(2); // Go to review
-    }
   };
 
   const handleSubmit = async () => {
@@ -168,128 +177,6 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
   const getStepContent = () => {
     switch (step) {
       case 0:
-        return (
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Box sx={{ p: 4 }}>
-              <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
-                <Avatar sx={{ bgcolor: "#CC0000", mr: 3 }}>
-                  <AccountCircleIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    Your Information
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    Please provide your contact details for the booking
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Grid container spacing={3}>
-                <Grid
-                  size={{
-                    xs: 12,
-                    md: 4,
-                  }}
-                >
-                  <TextField
-                    fullWidth
-                    label="Full Name"
-                    value={userInfo.name}
-                    onChange={handleUserInfoChange("name")}
-                    InputProps={{
-                      startAdornment: (
-                        <PersonIcon sx={{ color: "text.secondary", mr: 1 }} />
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid
-                  size={{
-                    xs: 12,
-                    md: 4,
-                  }}
-                  md={6}
-                >
-                  <TextField
-                    fullWidth
-                    label="Email Address"
-                    type="email"
-                    value={userInfo.email}
-                    onChange={handleUserInfoChange("email")}
-                    InputProps={{
-                      startAdornment: (
-                        <EmailIcon sx={{ color: "text.secondary", mr: 1 }} />
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid
-                  size={{
-                    xs: 12,
-                    md: 4,
-                  }}
-                  md={6}
-                >
-                  <TextField
-                    fullWidth
-                    label="Phone Number"
-                    value={userInfo.phone}
-                    onChange={handleUserInfoChange("phone")}
-                    InputProps={{
-                      startAdornment: (
-                        <PhoneIcon sx={{ color: "text.secondary", mr: 1 }} />
-                      ),
-                    }}
-                  />
-                </Grid>
-              </Grid>
-
-              <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end", flexDirection: { xs: "column", sm: "row" } }}>
-                {/* Back Button (bottom level) */}
-                {step === 0 && (
-                  <Button
-                    variant="outlined"
-                    onClick={onBack}
-                    sx={{
-                      mr: { xs: 0, sm: 2 },
-                      mb: { xs: 2, sm: 0 },
-                      px: 4,
-                      py: 1.5,
-                      borderColor: "#CC0000",
-                      color: "#CC0000",
-                      "&:hover": {
-                        borderColor: "#B30000",
-                        bgcolor: "rgba(204, 0, 0, 0.05)",
-                      },
-                    }}
-                  >
-                    Back to Service Selection
-                  </Button>
-                )}
-                <Button
-                  variant="contained"
-                  onClick={handleNextStep}
-                  disabled={!isUserInfoValid()}
-                  sx={{
-                    px: 4,
-                    py: 1.5,
-                    bgcolor: "#CC0000",
-                    "&:hover": { bgcolor: "#B30000" },
-                  }}
-                >
-                  Continue
-                </Button>
-              </Box>
-            </Box>
-          </motion.div>
-        );
-
-      case 1:
         return (
           <motion.div
             initial={{ opacity: 0, x: 50 }}
@@ -339,7 +226,12 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 4,
+                  }}
+                >
                   <TextField
                     fullWidth
                     label="Expiry Date"
@@ -348,7 +240,12 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
                     placeholder="MM/YY"
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 4,
+                  }}
+                >
                   <TextField
                     fullWidth
                     label="CVC"
@@ -369,7 +266,7 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
               >
                 <Button
                   variant="outlined"
-                  onClick={() => setStep(0)}
+                  onClick={onBack}
                   sx={{
                     px: 4,
                     py: 1.5,
@@ -381,7 +278,7 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
                 </Button>
                 <Button
                   variant="contained"
-                  onClick={handleNextStep}
+                  onClick={() => setStep(1)}
                   disabled={!isPaymentInfoValid()}
                   sx={{
                     px: 4,
@@ -397,9 +294,10 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
           </motion.div>
         );
 
-      case 2:
+      case 1:
         return (
           <motion.div
+            ref={reviewSectionRef}
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
@@ -493,13 +391,14 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
                   Contact Information
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Name:</strong> {userInfo.name}
+                  <strong>Name:</strong> {userInfo.name || "Porsche ID User"}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Email:</strong> {userInfo.email}
+                  <strong>Email:</strong> {userInfo.email || "user@porsche.com"}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Phone:</strong> {userInfo.phone}
+                  <strong>Phone:</strong>{" "}
+                  {userInfo.phone || "Available via Porsche ID"}
                 </Typography>
               </Paper>
 
@@ -525,7 +424,7 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Button
                   variant="outlined"
-                  onClick={() => setStep(bookingType === "concierge" ? 1 : 0)}
+                  onClick={() => setStep(0)}
                   sx={{
                     px: 4,
                     py: 1.5,
@@ -571,10 +470,10 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
   return (
     <>
       {/* Porsche ID Login Dialog */}
-      <Dialog 
-        open={showLoginDialog} 
-        onClose={() => {}} 
-        maxWidth="sm" 
+      <Dialog
+        open={showLoginDialog}
+        onClose={() => {}}
+        maxWidth="sm"
         fullWidth
         disableEscapeKeyDown
       >
@@ -583,10 +482,10 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
             <LockIcon sx={{ color: "#CC0000", fontSize: 32 }} />
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                Porsche ID Verification
+                Verify Porsche ID
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Please sign in to continue with your booking
+                Please verify your Porsche ID to continue
               </Typography>
             </Box>
           </Box>
@@ -608,9 +507,10 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
               }}
               sx={{
                 mb: 3,
-                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#CC0000",
-                },
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    borderColor: "#CC0000",
+                  },
               }}
             />
             <TextField
@@ -629,9 +529,10 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
               }}
               sx={{
                 mb: 2,
-                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#CC0000",
-                },
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    borderColor: "#CC0000",
+                  },
               }}
               onKeyPress={(e) => {
                 if (e.key === "Enter") handleLogin();
@@ -643,7 +544,8 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
               </Alert>
             )}
             <Typography variant="caption" color="text.secondary">
-              Your Porsche ID ensures secure access to your booking and payment information.
+              Your Porsche ID ensures secure access to your booking and payment
+              information.
             </Typography>
           </Box>
         </DialogContent>
@@ -661,7 +563,7 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
               px: 4,
             }}
           >
-            Sign In
+            Verify Porsche ID
           </Button>
         </DialogActions>
       </Dialog>

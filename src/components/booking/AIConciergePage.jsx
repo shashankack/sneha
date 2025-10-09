@@ -563,20 +563,17 @@ const AIConciergePage = ({ onNext }) => {
                         objectFit: "cover",
                       }}
                     />
-                    <CardContent sx={{ p: 3 }}>
-                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+                    <CardContent sx={{ py: 0 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
                         {model.name}
                       </Typography>
                       <Typography
                         variant="body2"
-                        sx={{ color: "text.secondary", mb: 2 }}
+                        sx={{ color: "text.secondary", mb: 1 }}
                       >
                         {model.title}
                       </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 700, color: "#CC0000" }}
-                      >
+                      <Typography variant="body1" sx={{ fontWeight: 700 }}>
                         {model.price}
                       </Typography>
                     </CardContent>

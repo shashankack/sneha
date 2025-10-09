@@ -69,17 +69,20 @@ const BookingPage = () => {
   useEffect(() => {
     // Only run this once when the component mounts
     if (initialized) return;
-    
+
     const preSelectedModel = sessionStorage.getItem("selectedModel");
     const serviceType = sessionStorage.getItem("serviceType");
-    
+
     // If coming from service selection with both model and service type
-    if (preSelectedModel && (serviceType === "centre" || serviceType === "concierge")) {
+    if (
+      preSelectedModel &&
+      (serviceType === "centre" || serviceType === "concierge")
+    ) {
       // Find the full model object from the models data
       const modelObject = porscheModels.find(
         (model) => model.name.toLowerCase() === preSelectedModel.toLowerCase()
       );
-      
+
       if (modelObject) {
         // Set the full model in context
         setSelectedModel(modelObject);
@@ -107,6 +110,7 @@ const BookingPage = () => {
   const handleFinish = () => {
     // Navigate to confirmation page
     navigate("/booking-confirmation");
+    window.scrollTo({ top: 0 });
   };
 
   const getStepContent = (stepIndex) => {

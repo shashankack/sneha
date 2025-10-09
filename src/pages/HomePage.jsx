@@ -51,9 +51,9 @@ const HomePage = () => {
   const features = [
     {
       icon: <DriveEtaIcon sx={{ fontSize: 40, color: "#CC0000" }} />,
-      title: "Direct Booking",
+      title: "Concierge Booking",
       description:
-        "Choose your model and service type with instant confirmation",
+        "AI-powered assistant to find your perfect Porsche model and test drive route.",
     },
     {
       icon: <ViewInArIcon sx={{ fontSize: 40, color: "#CC0000" }} />,

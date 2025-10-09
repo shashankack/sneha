@@ -49,6 +49,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
 import DownloadIcon from "@mui/icons-material/Download";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ShareLocationIcon from '@mui/icons-material/ShareLocation';
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import CloseIcon from "@mui/icons-material/Close";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
@@ -126,6 +127,7 @@ const BookingConfirmationPage = () => {
   const [showWalletPass, setShowWalletPass] = useState(false);
   const [showARPreview, setShowARPreview] = useState(false);
   const [showHaptics, setShowHaptics] = useState(false);
+  const [showTracking, setShowTracking] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [selectedDriveMode, setSelectedDriveMode] = useState(null);
   const [musicConnected, setMusicConnected] = useState(false);
@@ -491,7 +493,7 @@ const BookingConfirmationPage = () => {
                     sx={{ fontSize: 48, color: "#CC0000", mb: 2 }}
                   />
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    AR Preview
+                    AR/VR Preview
                   </Typography>
                   <Typography variant="body2" sx={{ color: "text.secondary" }}>
                     See in your driveway
@@ -534,39 +536,41 @@ const BookingConfirmationPage = () => {
               </Card>
             </Grid>
 
-            {/* Music Connection */}
-            <Grid
-              size={{
-                xs: 12,
-                sm: 6,
-                md: 3,
-              }}
-            >
-              <Card
-                onClick={connectSpotify}
-                sx={{
-                  cursor: "pointer",
-                  height: "100%",
-                  transition: "all 0.3s ease",
-                  bgcolor: musicConnected ? "#4CAF50" : "white",
-                  color: musicConnected ? "white" : "inherit",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 8px 32px rgba(204, 0, 0, 0.15)",
-                  },
+            {/* Real-time Tracking (only for concierge) */}
+            {bookingType === "concierge" && (
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 6,
+                  md: 3,
                 }}
               >
-                <CardContent sx={{ textAlign: "center", p: 3 }}>
-                  <MusicNoteIcon sx={{ fontSize: 48, mb: 2 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    {musicConnected ? "Spotify Connected" : "Connect Music"}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                    {musicConnected ? "Ready for test drive" : "Your playlist"}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+                <Card
+                  onClick={() => setShowTracking(true)}
+                  sx={{
+                    cursor: "pointer",
+                    height: "100%",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: "0 8px 32px rgba(204, 0, 0, 0.15)",
+                    },
+                  }}
+                >
+                  <CardContent sx={{ textAlign: "center", p: 3 }}>
+                    <ShareLocationIcon
+                      sx={{ fontSize: 48, color: "#CC0000", mb: 2 }}
+                    />
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                      Real-time Tracking
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                      Track your delivery
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
           </Grid>
         </motion.div>
 
@@ -647,6 +651,58 @@ const BookingConfirmationPage = () => {
                 </Card>
               </Grid>
             ))}
+          </Grid>
+        </motion.div>
+
+        {/* Music Connection */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: 700, mb: 3, color: "#1a1a1a" }}
+          >
+            Connect Your Music
+          </Typography>
+
+          <Grid container spacing={3} sx={{ mb: 6 }}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+                md: 4,
+              }}
+            >
+              <Card
+                onClick={connectSpotify}
+                sx={{
+                  cursor: "pointer",
+                  height: "100%",
+                  transition: "all 0.3s ease",
+                  bgcolor: musicConnected ? "#4CAF50" : "white",
+                  color: musicConnected ? "white" : "inherit",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 8px 32px rgba(204, 0, 0, 0.15)",
+                  },
+                }}
+              >
+                <CardContent sx={{ textAlign: "center", p: 4 }}>
+                  <MusicNoteIcon sx={{ fontSize: 60, mb: 2 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                    {musicConnected ? "Spotify Connected" : "Connect Music"}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    {musicConnected ? "Ready for test drive" : "Sync your playlist for the drive"}
+                  </Typography>
+                  {musicConnected && (
+                    <CheckCircleIcon sx={{ mt: 2, fontSize: 24 }} />
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
         </motion.div>
 
@@ -824,7 +880,7 @@ const BookingConfirmationPage = () => {
               alignItems: "center",
             }}
           >
-            AR Preview - {selectedModel?.name}
+            AR/VR Preview - {selectedModel?.name}
             <IconButton onClick={() => setShowARPreview(false)}>
               <CloseIcon />
             </IconButton>
@@ -849,16 +905,16 @@ const BookingConfirmationPage = () => {
                   sx={{ fontSize: 80, color: "#CC0000", mb: 2 }}
                 />
                 <Typography variant="h6" sx={{ color: "text.secondary" }}>
-                  AR Preview Coming Soon
+                  AR/VR Preview Coming Soon
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   Point your camera at your driveway to see the{" "}
-                  {selectedModel?.name}
+                  {selectedModel?.name} in AR or experience it in VR
                 </Typography>
               </Box>
             </Box>
             <Alert severity="info">
-              AR functionality requires camera permissions and a compatible
+              AR/VR functionality requires camera permissions and a compatible
               device. This feature will be available in the upcoming mobile app.
             </Alert>
           </Box>
@@ -950,6 +1006,81 @@ const BookingConfirmationPage = () => {
                 </Grid>
               ))}
             </Grid>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Real-time Tracking Dialog */}
+      <Dialog
+        open={showTracking}
+        onClose={() => setShowTracking(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            Real-time Delivery Tracking
+            <IconButton onClick={() => setShowTracking(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ p: 3 }}>
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <Typography variant="body2">
+                <strong>Track your Porsche delivery:</strong> You'll receive real-time updates via SMS and email as your concierge approaches your location.
+              </Typography>
+            </Alert>
+
+            <Paper elevation={0} sx={{ p: 3, bgcolor: "rgba(248, 249, 250, 0.8)", mb: 3 }}>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <LocationOnIcon sx={{ color: "#CC0000", mr: 2 }} />
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  Delivery Status
+                </Typography>
+              </Box>
+              
+              <List>
+                <ListItem>
+                  <ListItemIcon>
+                    <CheckCircleIcon sx={{ color: "#4CAF50" }} />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="Vehicle Prepared" 
+                    secondary="Your Porsche is ready and inspected"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <CheckCircleIcon sx={{ color: "#4CAF50" }} />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="Concierge Assigned" 
+                    secondary="Professional driver en route to your location"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <AccessTimeIcon sx={{ color: "#FF9800" }} />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="En Route" 
+                    secondary="ETA: 15 minutes - You'll receive live updates"
+                  />
+                </ListItem>
+              </List>
+            </Paper>
+
+            <Typography variant="body2" sx={{ color: "text.secondary", textAlign: "center" }}>
+              Live tracking will be activated 30 minutes before your scheduled delivery time.
+            </Typography>
           </Box>
         </DialogContent>
       </Dialog>
