@@ -31,7 +31,9 @@ const PaymentPage = () => {
     sessionStorage.getItem("conciergeDetails") || "{}"
   );
   const selectedModel = sessionStorage.getItem("selectedModel") || "Taycan";
-  const isConciergeService = Object.keys(conciergeDetails).length > 0;
+  const serviceType = sessionStorage.getItem("serviceType") || "centre";
+  const isConciergeService =
+    serviceType === "concierge" && Object.keys(conciergeDetails).length > 0;
 
   const [formData, setFormData] = useState({
     cardNumber: "",

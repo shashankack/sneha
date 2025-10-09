@@ -1,15 +1,6 @@
 // Dummy Porsche Center Data
 export const porscheCenters = [
   {
-    id: 'sydney',
-    name: 'Porsche Centre Sydney',
-    address: '75 O\'Riordan Street, Alexandria, NSW 2015',
-    phone: '(02) 8338 3911',
-    coordinates: { lat: -33.9173, lng: 151.2016 },
-    availableDates: ['2025-10-15', '2025-10-16', '2025-10-20', '2025-10-22'],
-    availableTimes: ['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM']
-  },
-  {
     id: 'melbourne',
     name: 'Porsche Centre Melbourne',
     address: '420 St Kilda Road, Melbourne, VIC 3004',
@@ -19,13 +10,31 @@ export const porscheCenters = [
     availableTimes: ['10:00 AM', '12:00 PM', '03:00 PM', '05:00 PM']
   },
   {
-    id: 'brisbane',
-    name: 'Porsche Centre Brisbane',
-    address: '86 Breakfast Creek Road, Newstead, QLD 4006',
-    phone: '(07) 3633 9911',
-    coordinates: { lat: -27.4422, lng: 153.0448 },
+    id: 'brighton',
+    name: 'Porsche Centre Brighton',
+    address: '161 Bay Street, Brighton, VIC 3186',
+    phone: '(03) 9596 6911',
+    coordinates: { lat: -37.9071, lng: 144.9926 },
+    availableDates: ['2025-10-15', '2025-10-16', '2025-10-20', '2025-10-22'],
+    availableTimes: ['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM']
+  },
+  {
+    id: 'doncaster',
+    name: 'Porsche Centre Doncaster',
+    address: '1060 Doncaster Road, Doncaster, VIC 3108',
+    phone: '(03) 9848 9911',
+    coordinates: { lat: -37.7850, lng: 145.1294 },
     availableDates: ['2025-10-13', '2025-10-18', '2025-10-21', '2025-10-24'],
     availableTimes: ['09:30 AM', '11:30 AM', '01:30 PM', '03:30 PM']
+  },
+  {
+    id: 'approved-melbourne',
+    name: 'Porsche Approved Centre Melbourne',
+    address: '75 O\'Riordan Street, Alexandria, NSW 2015',
+    phone: '(03) 8338 3911',
+    coordinates: { lat: -37.8172, lng: 144.9570 },
+    availableDates: ['2025-10-14', '2025-10-17', '2025-10-19', '2025-10-25'],
+    availableTimes: ['10:00 AM', '12:30 PM', '02:30 PM', '04:30 PM']
   }
 ];
 

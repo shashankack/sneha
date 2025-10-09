@@ -14,17 +14,18 @@ export const useBooking = () => {
 
 // Booking Provider Component
 export const BookingProvider = ({ children }) => {
-  // Step management (0: Landing, 1: Model Selection, 2: Booking Details, 3: Confirmation)
-  const [step, setStep] = useState(0);
+  // Step management for the new 3-step booking process
+  const [step, setStep] = useState(0); // 0: AI Concierge, 1: Center/Service Selection, 2: Verification/Payment
   
   // Selected model data
   const [selectedModel, setSelectedModel] = useState(null);
   
-  // AI conversation answers
+  // AI conversation answers and analysis
   const [aiAnswers, setAiAnswers] = useState([]);
+  const [aiSuggestion, setAiSuggestion] = useState(null);
   
   // Booking type: 'center' or 'concierge'
-  const [bookingType, setBookingType] = useState('center');
+  const [bookingType, setBookingType] = useState(null);
   
   // Selected Porsche Center
   const [selectedCenter, setSelectedCenter] = useState(null);
@@ -35,10 +36,12 @@ export const BookingProvider = ({ children }) => {
     date: null,
     time: '',
     route: null,
-    music: null
+    music: null,
+    driveMode: null,
+    playlist: null
   });
   
-  // User information (for Step 3)
+  // User information
   const [userInfo, setUserInfo] = useState({
     email: '',
     phone: '',
@@ -51,6 +54,16 @@ export const BookingProvider = ({ children }) => {
     expiry: '',
     cvc: ''
   });
+
+  // Premium features state
+  const [premiumFeatures, setPremiumFeatures] = useState({
+    walletPass: false,
+    arPreview: false,
+    hapticExperience: false,
+    musicConnected: false,
+    routeSelected: null,
+    driveModePreference: null
+  });
   
   // Navigation helpers
   const nextStep = () => setStep(prev => prev + 1);
@@ -60,17 +73,28 @@ export const BookingProvider = ({ children }) => {
     setStep(0);
     setSelectedModel(null);
     setAiAnswers([]);
-    setBookingType('center');
+    setAiSuggestion(null);
+    setBookingType(null);
     setSelectedCenter(null);
     setBookingDetails({
       address: '',
       date: null,
       time: '',
       route: null,
-      music: null
+      music: null,
+      driveMode: null,
+      playlist: null
     });
     setUserInfo({ email: '', phone: '', name: '' });
     setPaymentInfo({ cardNumber: '', expiry: '', cvc: '' });
+    setPremiumFeatures({
+      walletPass: false,
+      arPreview: false,
+      hapticExperience: false,
+      musicConnected: false,
+      routeSelected: null,
+      driveModePreference: null
+    });
   };
   
   // Model selection handler
@@ -83,9 +107,13 @@ export const BookingProvider = ({ children }) => {
     setSelectedModel(model);
   };
   
-  // AI answer handler
+  // AI answer handlers
   const addAiAnswer = (answer) => {
     setAiAnswers(prev => [...prev, answer]);
+  };
+
+  const setAiSuggestionModel = (model) => {
+    setAiSuggestion(model);
   };
   
   // Booking details handler
@@ -101,6 +129,37 @@ export const BookingProvider = ({ children }) => {
   // Payment info handler
   const updatePaymentInfo = (info) => {
     setPaymentInfo(prev => ({ ...prev, ...info }));
+  };
+
+  // Premium features handlers
+  const updatePremiumFeatures = (features) => {
+    setPremiumFeatures(prev => ({ ...prev, ...features }));
+  };
+
+  const enableWalletPass = () => {
+    setPremiumFeatures(prev => ({ ...prev, walletPass: true }));
+  };
+
+  const enableARPreview = () => {
+    setPremiumFeatures(prev => ({ ...prev, arPreview: true }));
+  };
+
+  const enableHapticExperience = () => {
+    setPremiumFeatures(prev => ({ ...prev, hapticExperience: true }));
+  };
+
+  const connectMusic = (platform = 'spotify') => {
+    setPremiumFeatures(prev => ({ ...prev, musicConnected: platform }));
+  };
+
+  const selectRoute = (route) => {
+    setPremiumFeatures(prev => ({ ...prev, routeSelected: route }));
+    updateBookingDetails({ route });
+  };
+
+  const setDriveModePreference = (driveMode) => {
+    setPremiumFeatures(prev => ({ ...prev, driveModePreference: driveMode }));
+    updateBookingDetails({ driveMode });
   };
   
   // Booking data consolidation (for easier access)
@@ -120,28 +179,61 @@ export const BookingProvider = ({ children }) => {
     updateBookingDetails(detailsUpdate);
   };
 
+  // Get booking summary for confirmation
+  const getBookingSummary = () => {
+    return {
+      model: selectedModel,
+      type: bookingType,
+      center: selectedCenter,
+      details: bookingDetails,
+      user: userInfo,
+      payment: bookingType === 'concierge' ? paymentInfo : null,
+      features: premiumFeatures,
+      aiAnswers,
+      aiSuggestion
+    };
+  };
+
+  // Check if booking is complete
+  const isBookingComplete = () => {
+    return selectedModel && 
+           bookingType && 
+           (bookingType === 'center' ? selectedCenter : bookingDetails.address) &&
+           bookingDetails.date && 
+           bookingDetails.time &&
+           userInfo.name && 
+           userInfo.email && 
+           userInfo.phone &&
+           (bookingType === 'center' || (paymentInfo.cardNumber && paymentInfo.expiry && paymentInfo.cvc));
+  };
+
   // Context value
   const value = {
     // State
     step,
     selectedModel,
     aiAnswers,
+    aiSuggestion,
     bookingType,
     selectedCenter,
     bookingDetails,
     bookingData,
     userInfo,
     paymentInfo,
+    premiumFeatures,
     
     // Setters
     setStep,
     setSelectedModel,
     setAiAnswers,
+    setAiSuggestion,
+    setAiSuggestionModel,
     setBookingType,
     setSelectedCenter,
     setBookingDetails,
     setUserInfo,
     setPaymentInfo,
+    setPremiumFeatures,
     
     // Helpers
     nextStep,
@@ -154,7 +246,16 @@ export const BookingProvider = ({ children }) => {
     updateBookingDetails,
     updateBookingData,
     updateUserInfo,
-    updatePaymentInfo
+    updatePaymentInfo,
+    updatePremiumFeatures,
+    enableWalletPass,
+    enableARPreview,
+    enableHapticExperience,
+    connectMusic,
+    selectRoute,
+    setDriveModePreference,
+    getBookingSummary,
+    isBookingComplete
   };
   
   return (

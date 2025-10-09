@@ -15,25 +15,45 @@ import {
 import { motion } from "framer-motion";
 import { useBooking } from "../contexts/BookingContext";
 import Navbar from "../components/Navbar";
-import ChatModal from "../components/ChatModal";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
 import NatureIcon from "@mui/icons-material/Nature";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
+import DriveEtaIcon from "@mui/icons-material/DriveEta";
 import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
+import { porscheModels as allPorscheModels } from "../data/models";
+import { video } from "framer-motion/client";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { updateSelectedModel } = useBooking();
+  const [hoveredModel, setHoveredModel] = React.useState(null);
+  const [playingVideo, setPlayingVideo] = React.useState(null);
+  const videoRefs = React.useRef({});
+  const hoverTimeouts = React.useRef({});
+
+  const scrollToFeatures = () => {
+    const featuresSection = document.getElementById("features-section");
+    if (featuresSection) {
+      featuresSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
+  const handleBookTestDrive = () => {
+    navigate("/booking");
+    window.scrollTo({ top: 0 });
+  };
 
   const features = [
     {
-      icon: <SmartToyIcon sx={{ fontSize: 40, color: "#CC0000" }} />,
-      title: "AI Concierge",
+      icon: <DriveEtaIcon sx={{ fontSize: 40, color: "#CC0000" }} />,
+      title: "Direct Booking",
       description:
-        "Intelligent chat assistant for personalized recommendations",
+        "Choose your model and service type with instant confirmation",
     },
     {
       icon: <ViewInArIcon sx={{ fontSize: 40, color: "#CC0000" }} />,
@@ -48,37 +68,82 @@ const HomePage = () => {
     },
   ];
 
-  const porscheModels = [
-    {
-      name: "Taycan",
-      title: "The All-Electric Performer",
-      type: "Electric",
-      price: "From $158,000",
-      image: "/models/taycan.jpeg",
-      icon: <ElectricBoltIcon sx={{ color: "#4CAF50" }} />,
-    },
-    {
-      name: "911 Turbo",
-      title: "The Iconic Legend",
-      type: "Petrol",
-      price: "From $231,000",
-      image: "/models/911.jpeg",
-      icon: <LocalGasStationIcon sx={{ color: "#FF9800" }} />,
-    },
-    {
-      name: "Cayenne",
-      title: "The Versatile Performer",
-      type: "Hybrid",
-      price: "From $131,000",
-      image: "/models/cayenne.jpg",
-      icon: <NatureIcon sx={{ color: "#2196F3" }} />,
-    },
-  ];
+  // Map icon based on type
+  const getModelIcon = (type) => {
+    switch (type) {
+      case "Electric":
+        return <ElectricBoltIcon sx={{ color: "#4CAF50" }} />;
+      case "Petrol":
+        return <LocalGasStationIcon sx={{ color: "#FF9800" }} />;
+      case "Hybrid":
+        return <NatureIcon sx={{ color: "#2196F3" }} />;
+      default:
+        return <DriveEtaIcon sx={{ color: "#CC0000" }} />;
+    }
+  };
+
+  // Convert data to HomePage model format
+  const porscheModels = allPorscheModels.map((model) => ({
+    name: model.name,
+    title: model.title,
+    type: model.type,
+    price: model.price,
+    image: model.image,
+    video: model.video,
+    icon: getModelIcon(model.type),
+  }));
 
   const handleModelClick = (model) => {
+    // Store selected model in sessionStorage for the service selection
+    sessionStorage.setItem("selectedModel", model.name);
     updateSelectedModel(model);
-    navigate('/booking');
+    navigate("/service-selection");
   };
+
+  const handleMouseEnter = (index) => {
+    setHoveredModel(index);
+
+    // Clear any existing timeout for this model
+    if (hoverTimeouts.current[index]) {
+      clearTimeout(hoverTimeouts.current[index]);
+    }
+
+    // Set a timeout to play video after 500ms delay
+    hoverTimeouts.current[index] = setTimeout(() => {
+      const video = videoRefs.current[index];
+      if (video && porscheModels[index].video) {
+        video.play().catch((err) => console.log("Video play error:", err));
+        setPlayingVideo(index);
+      }
+    }, 500);
+  };
+
+  const handleMouseLeave = (index) => {
+    setHoveredModel(null);
+
+    // Clear the timeout if mouse leaves before video starts
+    if (hoverTimeouts.current[index]) {
+      clearTimeout(hoverTimeouts.current[index]);
+    }
+
+    // Pause and reset video, then load to show poster image again
+    const video = videoRefs.current[index];
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+      video.load(); // This reloads the video and shows the poster image
+      setPlayingVideo(null);
+    }
+  };
+
+  // Cleanup timeouts on unmount
+  React.useEffect(() => {
+    return () => {
+      Object.values(hoverTimeouts.current).forEach((timeout) =>
+        clearTimeout(timeout)
+      );
+    };
+  }, []);
 
   return (
     <>
@@ -193,7 +258,7 @@ const HomePage = () => {
                   color: "rgba(255, 255, 255, 0.9)",
                   fontSize: { xs: "1rem", md: "1.5rem" },
                   maxWidth: "900px",
-                  mx: "auto",
+                  mx: { xs: "auto", md: 0 },
                 }}
               >
                 AI-powered concierge, AR previews, and 3-click booking.
@@ -203,30 +268,32 @@ const HomePage = () => {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.9, duration: 0.6 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.9 }}
             >
               <Button
                 variant="contained"
-                color="primary"
                 size="large"
                 endIcon={<ArrowForwardIcon />}
-                onClick={() => navigate('/model-selection')}
+                onClick={handleBookTestDrive}
                 sx={{
                   px: 6,
-                  py: 2,
-                  fontSize: "1rem",
+                  py: 2.5,
+                  fontSize: "1.1rem",
                   fontWeight: 700,
                   borderRadius: 2,
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
-                  boxShadow: "0 16px 48px rgba(204, 0, 0, 0.6)",
-                  transition: "all 0.3s ease",
+                  bgcolor: "#CC0000",
+                  color: "white",
+                  boxShadow: "0 12px 40px rgba(204, 0, 0, 0.4)",
                   "&:hover": {
+                    bgcolor: "#B30000",
                     transform: "translateY(-4px)",
-                    boxShadow: "0 20px 56px rgba(204, 0, 0, 0.8)",
+                    boxShadow: "0 16px 48px rgba(204, 0, 0, 0.5)",
                   },
+                  transition: "all 0.3s ease",
                 }}
               >
                 Start Your Journey
@@ -239,7 +306,7 @@ const HomePage = () => {
       {/* Main Content - Bright Background */}
       <Box sx={{ bgcolor: "#F8F9FA", minHeight: "100vh" }}>
         {/* Features Section */}
-        <Container maxWidth="lg" sx={{ py: 10 }}>
+        <Container maxWidth="lg" sx={{ py: 10 }} id="features-section">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -328,7 +395,7 @@ const HomePage = () => {
         </Container>
 
         {/* Models Showcase Section */}
-        <Container maxWidth="lg" sx={{ py: 10 }}>
+        <Container maxWidth="xl" sx={{ py: 10 }}>
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -362,93 +429,149 @@ const HomePage = () => {
             </Typography>
           </motion.div>
 
-          <Grid container spacing={4}>
-            {porscheModels.map((model, index) => (
-              <Grid
-                size={{
-                  xs: 12,
-                  sm: 6,
-                  md: 4,
-                }}
-                key={model.name}
-              >
-                <motion.div
-                  initial={{ opacity: 0, y: 60 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.2, duration: 0.8 }}
-                  whileHover={{ scale: 1.02 }}
+          <Box
+            sx={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              py: 4,
+              "&::-webkit-scrollbar": {
+                height: 3,
+              },
+              "&::-webkit-scrollbar-track": {
+                bgcolor: "rgba(0, 0, 0, 0.05)",
+                borderRadius: 4,
+              },
+              "&::-webkit-scrollbar-thumb": {
+                bgcolor: "#CC0000",
+                borderRadius: 4,
+                "&:hover": {
+                  bgcolor: "#AA0000",
+                },
+              },
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                gap: 4,
+                minWidth: "min-content",
+              }}
+            >
+              {porscheModels.map((model, index) => (
+                <Box
+                  key={model.name}
+                  sx={{
+                    flexShrink: 0,
+                    width:
+                      hoveredModel === index
+                        ? 600
+                        : hoveredModel !== null
+                        ? 300
+                        : 400,
+                    transition: "width 0.3s ease",
+                  }}
                 >
-                  <Box
-                    onClick={() => handleModelClick(model)}
-                    sx={{
-                      height: 280,
-                      position: "relative",
-                      overflow: "hidden",
-                      borderRadius: 4,
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      "&:hover": {
-                        "& .model-image": {
-                          transform: "scale(1.1)",
-                        },
-                        "& .arrow-icon": {
-                          transform: "translateX(8px)",
-                        },
-                      },
+                  <motion.div
+                    initial={{ opacity: 0, y: 60 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.2, duration: 0.8 }}
+                    animate={{
+                      scale: hoveredModel === index ? 1.05 : 1,
                     }}
+                    onMouseEnter={() => handleMouseEnter(index)}
+                    onMouseLeave={() => handleMouseLeave(index)}
                   >
                     <Box
-                      component="img"
-                      src={model.image}
-                      alt={model.name}
-                      className="model-image"
+                      onClick={() => handleModelClick(model)}
                       sx={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        transition: "transform 0.3s ease",
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        background:
-                          "linear-gradient(transparent, rgba(0,0,0,0.8))",
-                        p: 3,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
+                        height: 400,
+                        position: "relative",
+                        overflow: "hidden",
+                        borderRadius: 4,
+                        cursor: "pointer",
+                        transition: "all 0.3s ease",
+
+                        "&:hover": {
+                          "& .model-video": {
+                            transform: "scale(1.1)",
+                          },
+                          "& .arrow-icon": {
+                            transform: "translateX(8px)",
+                          },
+                        },
                       }}
                     >
-                      <Typography
-                        variant="h6"
+                      {model.video ? (
+                        <Box
+                          component="video"
+                          ref={(el) => (videoRefs.current[index] = el)}
+                          src={model.video}
+                          poster={model.image}
+                          muted
+                          loop
+                          className="model-video"
+                          sx={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            transition: "transform 0.3s ease",
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          component="img"
+                          src={model.image}
+                          alt={model.name}
+                          className="model-video"
+                          sx={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            transition: "transform 0.3s ease",
+                          }}
+                        />
+                      )}
+                      <Box
                         sx={{
-                          fontWeight: 700,
-                          color: "white",
-                          textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          background:
+                            "linear-gradient(transparent, rgba(0,0,0,0.8))",
+                          p: 3,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
                         }}
                       >
-                        {model.name}
-                      </Typography>
-                      <ArrowForwardIcon
-                        className="arrow-icon"
-                        sx={{
-                          color: "white",
-                          mr: 4,
-                          fontSize: 28,
-                          transition: "transform 0.3s ease",
-                        }}
-                      />
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 700,
+                            color: "white",
+                            textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+                          }}
+                        >
+                          {model.name}
+                        </Typography>
+                        <ArrowForwardIcon
+                          className="arrow-icon"
+                          sx={{
+                            color: "white",
+                            mr: 4,
+                            fontSize: 28,
+                            transition: "transform 0.3s ease",
+                          }}
+                        />
+                      </Box>
                     </Box>
-                  </Box>
-                </motion.div>
-              </Grid>
-            ))}
-          </Grid>
+                  </motion.div>
+                </Box>
+              ))}
+            </Box>
+          </Box>
 
           {/* CTA Section */}
           <Box sx={{ textAlign: "center", mt: 10 }}>
@@ -469,7 +592,7 @@ const HomePage = () => {
                 color="primary"
                 size="large"
                 endIcon={<ArrowForwardIcon />}
-                onClick={() => navigate('/model-selection')}
+                onClick={handleBookTestDrive}
                 sx={{
                   px: 8,
                   py: 3,
@@ -479,6 +602,7 @@ const HomePage = () => {
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
                   boxShadow: "0 12px 40px rgba(204, 0, 0, 0.3)",
+                  transition: "all 0.3s ease",
                   "&:hover": {
                     transform: "translateY(-4px)",
                     boxShadow: "0 16px 48px rgba(204, 0, 0, 0.4)",
@@ -491,9 +615,6 @@ const HomePage = () => {
           </Box>
         </Container>
       </Box>
-      
-      {/* Chat Modal with Full Booking Flow */}
-      <ChatModal />
     </>
   );
 };

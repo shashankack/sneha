@@ -2,8 +2,11 @@ import React, { createContext, useContext, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import HomePage from './pages/HomePage';
+import ServiceSelection from './pages/ServiceSelection';
 import ConciergeDetails from './pages/ConciergeDetails';
 import PaymentPage from './pages/PaymentPage';
+import BookingPage from './pages/BookingPage';
+import BookingConfirmationPage from './pages/BookingConfirmationPage';
 
 // Authentication context for route protection
 const AuthContext = createContext();
@@ -36,6 +39,9 @@ const App = () => {
       <Box sx={{ minHeight: '100vh' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/service-selection" element={<ServiceSelection />} />
+          <Route path="/booking" element={<BookingPage />} />
+          <Route path="/booking-confirmation" element={<BookingConfirmationPage />} />
           <Route 
             path="/concierge" 
             element={
