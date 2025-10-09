@@ -18,6 +18,9 @@ import {
   Select,
   InputLabel,
 } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -44,7 +47,7 @@ const ConciergeDetails = () => {
     postcode: "",
 
     // Preferences
-    deliveryDate: "",
+    deliveryDate: null,
     deliveryTime: "",
     specialInstructions: "",
 
@@ -69,6 +72,30 @@ const ConciergeDetails = () => {
     }
   };
 
+  const handleDateChange = (newDate) => {
+    setFormData({
+      ...formData,
+      deliveryDate: newDate,
+    });
+
+    // Clear error when user selects a date
+    if (errors.deliveryDate) {
+      setErrors({
+        ...errors,
+        deliveryDate: "",
+      });
+    }
+  };
+
+  const shouldDisableDate = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const maxDate = new Date(today);
+    maxDate.setDate(maxDate.getDate() + 30);
+
+    return date < today || date > maxDate;
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -81,7 +108,6 @@ const ConciergeDetails = () => {
       "streetAddress",
       "suburb",
       "postcode",
-      "deliveryDate",
       "deliveryTime",
     ];
 
@@ -90,6 +116,11 @@ const ConciergeDetails = () => {
         newErrors[field] = "This field is required";
       }
     });
+
+    // Date validation (separate handling for Date object)
+    if (!formData.deliveryDate) {
+      newErrors.deliveryDate = "This field is required";
+    }
 
     // Email validation
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -138,8 +169,9 @@ const ConciergeDetails = () => {
   ];
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#F8F9FA" }}>
-      <Navbar />
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <Box sx={{ minHeight: "100vh", bgcolor: "#F8F9FA" }}>
+        <Navbar />
 
       <Container maxWidth="lg" sx={{ pt: 12, pb: 8 }}>
         <motion.div
@@ -417,25 +449,26 @@ const ConciergeDetails = () => {
                         sm: 6,
                       }}
                     >
-                      <TextField
-                        fullWidth
+                      <DatePicker
                         label="Preferred Delivery Date"
-                        type="date"
                         value={formData.deliveryDate}
-                        onChange={handleInputChange("deliveryDate")}
-                        error={!!errors.deliveryDate}
-                        helperText={errors.deliveryDate}
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        inputProps={{
-                          min: new Date().toISOString().split("T")[0], // Today's date
-                        }}
-                        sx={{
-                          "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                            {
-                              borderColor: "#CC0000",
+                        onChange={handleDateChange}
+                        shouldDisableDate={shouldDisableDate}
+                        minDate={new Date()}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            error: !!errors.deliveryDate,
+                            helperText: errors.deliveryDate,
+                            InputProps: {
+                              startAdornment: <CalendarTodayIcon sx={{ mr: 1, color: "#CC0000" }} />,
                             },
+                            sx: {
+                              "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#CC0000",
+                              },
+                            },
+                          },
                         }}
                       />
                     </Grid>
@@ -451,6 +484,7 @@ const ConciergeDetails = () => {
                           value={formData.deliveryTime}
                           onChange={handleInputChange("deliveryTime")}
                           label="Preferred Time Slot"
+                          startAdornment={<AccessTimeIcon sx={{ mr: 1, color: "#CC0000" }} />}
                           sx={{
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#CC0000",
@@ -516,7 +550,7 @@ const ConciergeDetails = () => {
                     <br />
                     • Service includes pickup at the end of your test drive
                     period
-                    <br />• Additional $200 service fee applies (refundable with
+                    <br />• $500 service fee (fully refundable with
                     vehicle purchase)
                   </Typography>
                 </Alert>
@@ -618,7 +652,12 @@ const ConciergeDetails = () => {
                       Delivery Date:
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                      {new Date(formData.deliveryDate).toLocaleDateString()}
+                      {formData.deliveryDate.toLocaleDateString('en-AU', { 
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
                     </Typography>
                   </Box>
                 )}
@@ -638,7 +677,7 @@ const ConciergeDetails = () => {
 
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2" color="text.secondary">
-                    Security Deposit:
+                    Concierge Service Fee:
                   </Typography>
                   <Typography
                     variant="h6"
@@ -648,23 +687,11 @@ const ConciergeDetails = () => {
                   </Typography>
                 </Box>
 
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Service Fee:
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 700, color: "#CC0000" }}
-                  >
-                    $200
-                  </Typography>
-                </Box>
-
                 <Divider sx={{ my: 2 }} />
 
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Total: $700
+                    Total: $500
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     Fully refundable with vehicle purchase
@@ -676,6 +703,7 @@ const ConciergeDetails = () => {
         </motion.div>
       </Container>
     </Box>
+    </LocalizationProvider>
   );
 };
 

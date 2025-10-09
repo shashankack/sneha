@@ -47,13 +47,9 @@ const ServiceSelection = () => {
 
     // Use setTimeout to ensure state update completes before navigation
     setTimeout(() => {
-      if (serviceType === "concierge") {
-        // Navigate to concierge details form
-        navigate("/concierge");
-      } else {
-        // For centre visit, go straight to payment
-        navigate("/payment");
-      }
+      // Both services now go to booking page
+      // The booking page will handle skipping steps based on service type
+      navigate("/booking");
     }, 0);
   };
 
@@ -78,8 +74,8 @@ const ServiceSelection = () => {
         "Premium centre facilities",
       ],
       icon: <DriveEtaIcon sx={{ fontSize: 60, color: "#CC0000" }} />,
-      price: "$500",
-      priceNote: "Refundable deposit",
+      price: "Free",
+      priceNote: "No charge for centre visits",
       buttonText: "Book Centre Visit",
       recommended: false,
     },
@@ -97,8 +93,8 @@ const ServiceSelection = () => {
         "Pickup included",
       ],
       icon: <LocalShippingIcon sx={{ fontSize: 60, color: "#CC0000" }} />,
-      price: "$700",
-      priceNote: "$500 deposit + $200 service fee",
+      price: "$500",
+      priceNote: "Fully refundable with vehicle purchase",
       buttonText: "Book Concierge Service",
       recommended: true,
     },
@@ -283,7 +279,8 @@ const ServiceSelection = () => {
                           variant="h4"
                           sx={{
                             fontWeight: 700,
-                            color: "#CC0000",
+                            color:
+                              service.price === "Free" ? "green" : "#CC0000",
                             mb: 1,
                           }}
                         >

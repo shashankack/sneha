@@ -13,6 +13,10 @@ import {
   Divider,
   IconButton,
   InputAdornment,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
@@ -21,10 +25,12 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import SecurityIcon from "@mui/icons-material/Security";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LockIcon from "@mui/icons-material/Lock";
+import EmailIcon from "@mui/icons-material/Email";
 
 const PaymentPage = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, isAuthenticated, login } = useAuth();
 
   // Check for concierge details from previous flow
   const conciergeDetails = JSON.parse(
@@ -42,15 +48,49 @@ const PaymentPage = () => {
     cardholderName: "",
   });
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(!isAuthenticated);
+  const [loginData, setLoginData] = useState({
+    porscheId: "",
+    password: "",
+  });
+  const [loginError, setLoginError] = useState("");
 
-  // Redirect if not authenticated
+  // Show login dialog if not authenticated
   useEffect(() => {
-    const checkAuth = () => {
-      // This will be handled by the ProtectedRoute, but keeping for safety
-    };
-    checkAuth();
-  }, []);
+    if (!isAuthenticated) {
+      setShowLoginDialog(true);
+    }
+  }, [isAuthenticated]);
+
+  const handleLoginInputChange = (field) => (event) => {
+    setLoginData({
+      ...loginData,
+      [field]: event.target.value,
+    });
+    setLoginError(""); // Clear error on input
+  };
+
+  const handleLogin = () => {
+    // Simple validation for demo purposes
+    if (!loginData.porscheId || !loginData.password) {
+      setLoginError("Please enter both Porsche ID and password");
+      return;
+    }
+
+    // Simulate login - in production this would be an API call
+    if (loginData.password.length >= 6) {
+      login();
+      setShowLoginDialog(false);
+      setLoginError("");
+    } else {
+      setLoginError("Invalid credentials. Please try again.");
+    }
+  };
+
+  const handleCancelLogin = () => {
+    // Return to previous page if user cancels login
+    navigate(-1);
+  };
 
   const handleInputChange = (field) => (event) => {
     setFormData({
@@ -65,17 +105,9 @@ const PaymentPage = () => {
     // Simulate payment processing
     setTimeout(() => {
       setIsProcessing(false);
-      setIsComplete(true);
-
-      // Clear session storage after successful payment
-      sessionStorage.removeItem("conciergeDetails");
-      sessionStorage.removeItem("selectedModel");
-
-      // Auto redirect after success and logout
-      setTimeout(() => {
-        logout(); // Clear authentication
-        navigate("/");
-      }, 6000);
+      
+      // Navigate to booking confirmation page
+      navigate("/booking-confirmation");
     }, 3000);
   };
 
@@ -92,81 +124,105 @@ const PaymentPage = () => {
     return cardNumber && expiryDate && cvc && cardholderName;
   };
 
-  if (isComplete) {
-    return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "#F8F9FA" }}>
-        <Navbar />
-        <Container maxWidth="md" sx={{ pt: 12, pb: 8 }}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-          >
-            <Paper
-              elevation={8}
-              sx={{
-                p: 6,
-                borderRadius: 4,
-                textAlign: "center",
-                boxShadow: "0 20px 60px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <CheckCircleIcon
-                sx={{
-                  fontSize: 80,
-                  color: "#4CAF50",
-                  mb: 3,
-                }}
-              />
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: 700,
-                  mb: 2,
-                  color: "black",
-                }}
-              >
-                Payment Successful!
-              </Typography>
-              <Typography
-                variant="h5"
-                sx={{
-                  color: "#CC0000",
-                  mb: 3,
-                }}
-              >
-                Your Porsche test drive is confirmed
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: "text.secondary",
-                  mb: 4,
-                }}
-              >
-                You'll receive a confirmation email shortly with all the
-                details. Redirecting you back to the homepage...
-              </Typography>
-              <Button
-                variant="contained"
-                onClick={handleReturnHome}
-                sx={{
-                  bgcolor: "#CC0000",
-                  "&:hover": { bgcolor: "#AA0000" },
-                }}
-              >
-                Return to Homepage
-              </Button>
-            </Paper>
-          </motion.div>
-        </Container>
-      </Box>
-    );
-  }
-
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#F8F9FA" }}>
       <Navbar />
+
+      {/* Porsche ID Login Dialog */}
+      <Dialog 
+        open={showLoginDialog} 
+        onClose={() => {}} 
+        maxWidth="sm" 
+        fullWidth
+        disableEscapeKeyDown
+      >
+        <DialogTitle>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <LockIcon sx={{ color: "#CC0000", fontSize: 32 }} />
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                Porsche ID Verification
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Please sign in to continue with payment
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <TextField
+              fullWidth
+              label="Porsche ID (Email)"
+              value={loginData.porscheId}
+              onChange={handleLoginInputChange("porscheId")}
+              placeholder="your.email@example.com"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon sx={{ color: "#CC0000" }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                mb: 3,
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#CC0000",
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={loginData.password}
+              onChange={handleLoginInputChange("password")}
+              placeholder="Enter your password"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ color: "#CC0000" }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                mb: 2,
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#CC0000",
+                },
+              }}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") handleLogin();
+              }}
+            />
+            {loginError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {loginError}
+              </Alert>
+            )}
+            <Typography variant="caption" color="text.secondary">
+              Your Porsche ID ensures secure access to your booking and payment information.
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 0 }}>
+          <Button onClick={handleCancelLogin} sx={{ color: "text.secondary" }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleLogin}
+            disabled={!loginData.porscheId || !loginData.password}
+            sx={{
+              bgcolor: "#CC0000",
+              "&:hover": { bgcolor: "#A00000" },
+              px: 4,
+            }}
+          >
+            Sign In
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Container maxWidth="md" sx={{ pt: 12, pb: 8 }}>
         <motion.div
@@ -236,10 +292,11 @@ const PaymentPage = () => {
                   }}
                 >
                   <Typography variant="body2">
-                    <strong>Refundable Deposit: $500</strong>
+                    <strong>{isConciergeService ? "Concierge Service Fee: $500" : "Refundable Deposit: $500"}</strong>
                     <br />
-                    This deposit secures your test drive and will be refunded
-                    within 3-5 business days.
+                    {isConciergeService 
+                      ? "This service fee is fully refundable with vehicle purchase."
+                      : "This deposit secures your test drive and will be refunded within 3-5 business days."}
                   </Typography>
                 </Alert>
 
@@ -450,7 +507,7 @@ const PaymentPage = () => {
                   }}
                 >
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Deposit:
+                    {isConciergeService ? "Service Fee:" : "Deposit:"}
                   </Typography>
                   <Typography
                     variant="h6"
@@ -460,57 +517,32 @@ const PaymentPage = () => {
                   </Typography>
                 </Box>
 
-                {isConciergeService && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mt: 1,
-                    }}
-                  >
-                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                      Service Fee:
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{ fontWeight: 600, color: "#CC0000" }}
-                    >
-                      $200
-                    </Typography>
-                  </Box>
-                )}
+                <Divider sx={{ my: 2 }} />
 
-                {isConciergeService && <Divider sx={{ my: 2 }} />}
-
-                {isConciergeService && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    Total:
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 700, color: "#CC0000" }}
                   >
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                      Total:
-                    </Typography>
-                    <Typography
-                      variant="h6"
-                      sx={{ fontWeight: 700, color: "#CC0000" }}
-                    >
-                      $700
-                    </Typography>
-                  </Box>
-                )}
+                    $500
+                  </Typography>
+                </Box>
 
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ mt: 1, display: "block" }}
                 >
-                  {isConciergeService
-                    ? "Fully refundable with vehicle purchase"
-                    : "Fully refundable within 3-5 business days"}
+                  Fully refundable with vehicle purchase
                 </Typography>
               </Paper>
             </Grid>

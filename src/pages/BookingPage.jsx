@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useBooking } from "../contexts/BookingContext";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { porscheModels } from "../data/models";
 
 // Step Components
 import AIConciergePage from "../components/booking/AIConciergePage";
@@ -54,6 +55,7 @@ const BookingPage = () => {
     step,
     setStep,
     selectedModel,
+    setSelectedModel,
     bookingType,
     resetBooking,
     nextStep,
@@ -61,6 +63,34 @@ const BookingPage = () => {
   } = useBooking();
 
   const [loading, setLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
+  // Check if model is already selected from service selection page
+  useEffect(() => {
+    // Only run this once when the component mounts
+    if (initialized) return;
+    
+    const preSelectedModel = sessionStorage.getItem("selectedModel");
+    const serviceType = sessionStorage.getItem("serviceType");
+    
+    // If coming from service selection with both model and service type
+    if (preSelectedModel && (serviceType === "centre" || serviceType === "concierge")) {
+      // Find the full model object from the models data
+      const modelObject = porscheModels.find(
+        (model) => model.name.toLowerCase() === preSelectedModel.toLowerCase()
+      );
+      
+      if (modelObject) {
+        // Set the full model in context
+        setSelectedModel(modelObject);
+        // Skip to step 1 (Center/Service Selection) immediately
+        setStep(1);
+        setInitialized(true);
+      }
+    } else {
+      setInitialized(true);
+    }
+  }, [initialized, setSelectedModel, setStep]);
 
   const handleNext = async () => {
     setLoading(true);
@@ -315,7 +345,7 @@ const BookingPage = () => {
       </Container>
 
       {/* Global Styles for Animations */}
-      <style jsx global>{`
+      <style>{`
         @keyframes float {
           0%,
           100% {

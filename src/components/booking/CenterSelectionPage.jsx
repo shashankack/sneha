@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -52,6 +52,20 @@ const CenterSelectionPage = ({ onNext, onBack }) => {
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [showConciergeDetails, setShowConciergeDetails] = useState(false);
   const dateTimeRef = React.useRef(null);
+
+  // Check if booking type is already selected from service selection page
+  useEffect(() => {
+    const preSelectedServiceType = sessionStorage.getItem("serviceType");
+    
+    // If coming from service selection with a service type
+    if (preSelectedServiceType && !bookingType) {
+      // Set the booking type based on service selection
+      // "centre" from ServiceSelection becomes "center" in BookingContext
+      const mappedBookingType = preSelectedServiceType === "centre" ? "center" : preSelectedServiceType;
+      setBookingType(mappedBookingType);
+      setShowConciergeDetails(mappedBookingType === "concierge");
+    }
+  }, [bookingType, setBookingType]);
 
   const handleServiceTypeChange = (event) => {
     const newBookingType = event.target.value;

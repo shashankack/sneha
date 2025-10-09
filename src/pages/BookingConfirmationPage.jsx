@@ -701,7 +701,15 @@ const BookingConfirmationPage = () => {
           <Button
             variant="outlined"
             onClick={() => {
+              // Clear sessionStorage
+              sessionStorage.removeItem("selectedModel");
+              sessionStorage.removeItem("serviceType");
+              sessionStorage.removeItem("conciergeDetails");
+              
+              // Reset booking context
               resetBooking();
+              
+              // Navigate to booking page
               navigate("/booking");
             }}
             sx={{
@@ -716,7 +724,18 @@ const BookingConfirmationPage = () => {
           </Button>
           <Button
             variant="contained"
-            onClick={() => navigate("/")}
+            onClick={() => {
+              // Clear sessionStorage
+              sessionStorage.removeItem("selectedModel");
+              sessionStorage.removeItem("serviceType");
+              sessionStorage.removeItem("conciergeDetails");
+              
+              // Reset booking context
+              resetBooking();
+              
+              // Navigate to home
+              navigate("/");
+            }}
             sx={{
               px: 6,
               py: 2,

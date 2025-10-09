@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -17,9 +17,13 @@ import {
   CircularProgress,
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogActions,
+  InputAdornment,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { useBooking } from "../../contexts/BookingContext";
+import { useAuth } from "../../App";
 import { conciergeService } from "../../data/centers";
 
 // Icons
@@ -35,6 +39,7 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import LockIcon from "@mui/icons-material/Lock";
 
 const VerificationPaymentPage = ({ onFinish, onBack }) => {
   const {
@@ -48,10 +53,61 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
     updatePaymentInfo,
   } = useBooking();
 
+  const { isAuthenticated, login } = useAuth();
+
   const [step, setStep] = useState(0); // 0: User Info, 1: Payment (if needed), 2: Review
   const [loading, setLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(!isAuthenticated);
+  const [loginData, setLoginData] = useState({
+    porscheId: "",
+    password: "",
+  });
+  const [loginError, setLoginError] = useState("");
+
+  // Show login dialog if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setShowLoginDialog(true);
+    }
+  }, [isAuthenticated]);
+
+  const handleLoginInputChange = (field) => (event) => {
+    setLoginData({
+      ...loginData,
+      [field]: event.target.value,
+    });
+    setLoginError(""); // Clear error on input
+  };
+
+  const handleLogin = () => {
+    // Simple validation for demo purposes
+    if (!loginData.porscheId || !loginData.password) {
+      setLoginError("Please enter both Porsche ID and password");
+      return;
+    }
+
+    // Simulate login - in production this would be an API call
+    if (loginData.password.length >= 6) {
+      login();
+      
+      // Pre-fill user's email from Porsche ID
+      updateUserInfo({ email: loginData.porscheId });
+      
+      setShowLoginDialog(false);
+      setLoginError("");
+    } else {
+      setLoginError("Invalid credentials. Please try again.");
+    }
+  };
+
+  const handleCancelLogin = () => {
+    // Go back to previous step if user cancels login
+    if (onBack) {
+      onBack();
+    }
+  };
 
   const handleUserInfoChange = (field) => (event) => {
     updateUserInfo({ [field]: event.target.value });
@@ -514,6 +570,102 @@ const VerificationPaymentPage = ({ onFinish, onBack }) => {
 
   return (
     <>
+      {/* Porsche ID Login Dialog */}
+      <Dialog 
+        open={showLoginDialog} 
+        onClose={() => {}} 
+        maxWidth="sm" 
+        fullWidth
+        disableEscapeKeyDown
+      >
+        <DialogTitle>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <LockIcon sx={{ color: "#CC0000", fontSize: 32 }} />
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                Porsche ID Verification
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Please sign in to continue with your booking
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <TextField
+              fullWidth
+              label="Porsche ID (Email)"
+              value={loginData.porscheId}
+              onChange={handleLoginInputChange("porscheId")}
+              placeholder="your.email@example.com"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon sx={{ color: "#CC0000" }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                mb: 3,
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#CC0000",
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={loginData.password}
+              onChange={handleLoginInputChange("password")}
+              placeholder="Enter your password"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ color: "#CC0000" }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                mb: 2,
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#CC0000",
+                },
+              }}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") handleLogin();
+              }}
+            />
+            {loginError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {loginError}
+              </Alert>
+            )}
+            <Typography variant="caption" color="text.secondary">
+              Your Porsche ID ensures secure access to your booking and payment information.
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 0 }}>
+          <Button onClick={handleCancelLogin} sx={{ color: "text.secondary" }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleLogin}
+            disabled={!loginData.porscheId || !loginData.password}
+            sx={{
+              bgcolor: "#CC0000",
+              "&:hover": { bgcolor: "#A00000" },
+              px: 4,
+            }}
+          >
+            Sign In
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {getStepContent()}
 
       {/* Confirmation Dialog */}
